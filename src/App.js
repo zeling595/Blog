@@ -3,7 +3,7 @@ import UserInfo from './components/UserInfo'
 import PostList from './components/PostList'
 import UserMenu from './components/UserMenu'
 import { Container, Box } from '@material-ui/core';
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { makeStyles } from '@material-ui/core/styles';
 import FadeLoader from "react-spinners/FadeLoader";
 
@@ -45,51 +45,23 @@ function App() {
   const [posts, setPosts] = useState([])
   const [userList, setUserList] = useState([])
 
-  useEffect(() => {
-    setLoading(true)
-    const getUser = async () => {
-      const userFromServer = await fetchUser()
-      if (userFromServer) {
-        setUser(userFromServer)
-        setLoading(false)
-      } else {
-        console.log("error")
-      }
-    }
-    getUser()
-  }, [userId])
-
-  useEffect(() => {
-    const getPosts = async () => {
-      const postsFromServer = await fetchPosts()
-      setPosts(postsFromServer)
-    }
-    getPosts()
-  }, [userId])
-
-  useEffect(() => {
-    const getUserList = async () => {
-      const userListFromServer = await fetchUserList()
-      setUserList(userListFromServer)
-    }
-    getUserList()
-  }, [])
-
   // Fetch user 
-  const fetchUser = async () => {
-    const res = await fetch(`https://jsonplaceholder.typicode.com/users/${userId}`)
-    const data = await res.json()
-
-    return data
-  }
+  const fetchUser = useCallback(
+    async () => {
+      const res = await fetch(`https://jsonplaceholder.typicode.com/users/${userId}`)
+      const data = await res.json()
+  
+      return data
+    }, [userId]) 
 
   // Fetch posts
-  const fetchPosts = async () => {
-    const res = await fetch(`https://jsonplaceholder.typicode.com/posts?userId=${userId}`)
-    const data = await res.json()
-
-    return data
-  }
+  const fetchPosts = useCallback(
+    async () => {
+      const res = await fetch(`https://jsonplaceholder.typicode.com/posts?userId=${userId}`)
+      const data = await res.json()
+  
+      return data
+    }, [userId]) 
 
   // Fetch list of users
   const fetchUserList = async () => {
@@ -102,6 +74,36 @@ function App() {
   const updateUserId = updatedUserId => {
     setUserId(updatedUserId)
   }
+
+  useEffect(() => {
+    setLoading(true)
+    const getUser = async () => {
+      const userFromServer = await fetchUser()
+      if (userFromServer) {
+        setUser(userFromServer)
+        setLoading(false)
+      } else {
+        console.log("error")
+      }
+    }
+    getUser()
+  }, [userId, fetchUser])
+
+  useEffect(() => {
+    const getPosts = async () => {
+      const postsFromServer = await fetchPosts()
+      setPosts(postsFromServer)
+    }
+    getPosts()
+  }, [userId, fetchPosts])
+
+  useEffect(() => {
+    const getUserList = async () => {
+      const userListFromServer = await fetchUserList()
+      setUserList(userListFromServer)
+    }
+    getUserList()
+  }, [])
 
   return (
     <div>
